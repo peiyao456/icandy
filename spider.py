@@ -23,6 +23,7 @@ class Spider(object):
         # 保存数据
         self.saveData(data_list)
         self.savePic(data_list)
+        self.saveDB(data_list)
 
     def getData(self):
         print("开始获取数据...")
@@ -125,13 +126,40 @@ class Spider(object):
         return
 
     def saveDB(self,data_list):
-        pass
+        self.createDB()
+        conn = sqlite3.connect(self.db_path)
+        cur = conn.cursor()
+        for data in data_list:
+            # print(data)
+            for i in range(len(data)):
+                if i != 4 and i != 5:
+                    data[i] = '"' + data[i] + '"'
+            sql = '''
+            insert into movie256
+            (info_link,pic_link,cname,ename,score,rated,introduction,info)
+            values(%s)
+            ''' % ",".join(data)
+            cur.execute(sql)
+            conn.commit()
+        # cur.close()
+        # conn.close()
+        #
+        # conn = sqlite3.connect(self.db_path)
+        # cur = conn.cursor()
+        sql = "select * from movie256;"
+        cur.execute(sql)
+        conn.commit()
+        results = cur.fetchall()
+        for r in results:
+            print(r)
+        cur.close()
+        conn.close()
 
     def createDB(self):
         sql = '''
         create table movie256 
         (
-        id integer primark key autocrement,
+        id integer primary key autoincrement,
         info_link text,
         pic_link text,
         cname varchar,
@@ -150,4 +178,4 @@ class Spider(object):
 
 if __name__ == "__main__":
     s = Spider()
-    s.createDB()
+    s.main()
